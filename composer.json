@@ -1,0 +1,26 @@
+{
+  "version": "0.1.0",
+  "name": "dashifen/wordpress-php7-theme-boilerplate",
+  "description": "An object-oriented boilerplate for WordPress themes",
+  "minimum-stability": "dev",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "David Dashifen Kees",
+      "email": "dashifen@dashifen.com",
+      "homepage": "https://dashifen.com",
+      "role": "developer"
+    }
+  ],
+
+  "autoload": {
+    "psr-4": {
+      "Dashifen\\WPTB\\": "src"
+    }
+  },
+  "require": {
+    "php": ">=7.1",
+    "dashifen/wordpress-php7-plugin-boilerplate": "^1.2"
+  }
+}
