@@ -7,6 +7,10 @@ use Dashifen\WPPB\Controller\AbstractController;
 use Dashifen\WPPB\Loader\LoaderException;
 use Dashifen\WPPB\Loader\LoaderInterface;
 
+/**
+ * Class AbstractTheme
+ * @package Dashifen\WPTB\Theme
+ */
 abstract class AbstractTheme extends AbstractController implements ThemeInterface {
 	/**
 	 * @var string $templateDir
@@ -17,7 +21,7 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 * @var
 	 */
 	protected $templateUrl;
-
+	
 	/**
 	 * @var string $stylesheetDir
 	 */
@@ -44,7 +48,7 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	protected $styles = [];
 	
 	/**
-	 * @var \WP_Theme $theme;
+	 * @var \WP_Theme $theme ;
 	 */
 	protected $theme;
 	
@@ -99,9 +103,9 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 					ThemeException::NOT_A_FOLDER);
 			}
 			
-			$foundFiles[$location] = $this->findFilesInFolder($absFolder, $extension);
+			$foundFiles[$location] = $this->findFilesInFolder($location, $absFolder, $extension);
 		}
-	
+		
 		return $foundFiles;
 	}
 	
@@ -130,12 +134,13 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	}
 	
 	/**
+	 * @param string $location
 	 * @param string $folder
 	 * @param string $extension
 	 *
 	 * @return array
 	 */
-	protected function findFilesInFolder(string $folder, string $extension): array {
+	protected function findFilesInFolder(string $location, string $folder, string $extension): array {
 		$dirIterator = new \RecursiveDirectoryIterator($folder);
 		$iteratorIterator = new \RecursiveIteratorIterator($dirIterator);
 		
@@ -149,16 +154,25 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 			/** @var \SplFileInfo $file */
 			
 			if ($file->getExtension() === $extension) {
-			
+				
 				// so, if we find a file that has the right extension, then
 				// we want to add it to our array of $foundFiles.  we index
-				// the array with our filename and the value is the full path
-				// to it.
+				// the array with our filename and the value is both the real
+				// path and the web path, the latter of which we construct
+				// using string replacement.
 				
-				$foundFiles[$file->getFilename()] = $file->getRealPath();
+				$realPath = $file->getRealPath();
+				$webPath = $location !== "template"
+					? str_replace($this->stylesheetDir, $this->stylesheetUrl, $realPath)
+					: str_replace($this->templateDir, $this->templateUrl, $realPath);
+				
+				$foundFiles[$file->getFilename()] = [
+					"realPath" => $realPath,
+					"webPath"  => $webPath,
+				];
 			}
 		}
-	
+		
 		return $foundFiles;
 	}
 	
@@ -189,63 +203,41 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 		$this->attachHooks();
 	}
 	
-	/*
-	 * UTILITY FUNCTIONS
-	 * Here's the bread and butter of this object's purpose:  to help theme
-	 * authors do common tasks without having to worry about the exact syntax
-	 * over and over again.  these methods are protected; we don't need the
-	 * WordPress ecosystem at large to know about them.
+	/**
+	 * @return string
 	 */
-	
-	protected function addScripts(array $scripts): void {
-		
-		// to add scripts, we get an array indexed by the scripts we're
-		// adding and the values at those indices are the dependencies for
-		// the scripts.  so something like ["theme.js" => ["jquery"]] would
-		// indicate that we want to load the theme.js file which depends on
-		// jquery.
-		
-		foreach ($scripts as $script => $dependencies) {
-			$this->addScript($script, $dependencies);
-		
-		
-		
-		}
-		
-		
-	}
-	
-	
-	
-	/*
-	 * BOILERPLATE FUNCTIONS
-	 * The following are all inherited from the plugin boilerplate.  Not
-	 * all of them are pertinent to themes, but many of them are abstract
-	 * so we want to do something with them to avoid forcing those using
-	 * this boilerplate to do so.
-	 */
-	
 	public function getName(): string {
 		return $this->theme->title;
 	}
 	
+	/**
+	 * @return string
+	 */
 	public function getFilename(): string {
 		return $this->theme->stylesheet;
 	}
 	
+	
+	/**
+	 * @return string
+	 */
 	public function getSettingsSlug(): string {
 		return $this->getSanitizedName();
 	}
 	
+	/**
+	 * @return BackendInterface|null
+	 */
 	final public function getBackend(): ?BackendInterface {
 		$this->raiseWarning(__METHOD__);
 		return null;
 	}
-
-	final protected function defineBackendHooks(): void {
-		$this->raiseWarning(__METHOD__);
-	}
 	
+	/**
+	 * @param string $method
+	 *
+	 * @return bool
+	 */
 	protected function raiseWarning(string $method): bool {
 		
 		// it's tempting to make this method final as well as the prior
@@ -254,5 +246,138 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 		// and run through the i18n API should they need to.
 		
 		return trigger_error("Inappropriate use of $method in theme.", E_WARNING);
+	}
+	
+	/**
+	 * @param array $scripts
+	 *
+	 * @return void
+	 * @throws ThemeException
+	 */
+	protected function addScripts(array $scripts): void {
+		
+		// to add scripts, we get a specifically structured multi-
+		// dimensional array.  the value of each index is the location,
+		// script's filename, and an array of dependencies.  in a perfect
+		// world, or a future version, we may change this to an array of
+		// Script objects, but that can wait for now.
+		
+		foreach ($scripts as $script) {
+			list($location, $script, $dependencies) = $script;
+			$this->addScript($location, $script, $dependencies);
+		}
+	}
+	
+	/**
+	 * @param string $location
+	 * @param string $script
+	 * @param array  $dependencies
+	 *
+	 * @return void
+	 * @throws ThemeException
+	 */
+	protected function addScript(string $location, string $script, array $dependencies = []): void {
+		
+		// $location tells us if this is a template (parent) or (child)
+		// theme script.  that allows us to narrow down the list of scripts
+		// that we use to check for $script.  if we can't find $script, we
+		// throw a tantrum.
+		
+		if (!isset($this->scripts[$location][$script])) {
+			throw new ThemeException("Unknown script: $script.",
+				ThemeException::UNKNOWN_SCRIPT);
+		}
+		
+		$handle = sprintf("%s-%s", $location, $script);
+		$file = $this->scripts[$location][$script];
+		$version = filemtime($file["realPath"]);
+		
+		wp_enqueue_script($handle, $file["webPath"], $dependencies, $version, true);
+	}
+	
+	/**
+	 * @param array $styles
+	 *
+	 * @throws ThemeException
+	 */
+	protected function addStyles(array $styles): void {
+		
+		// this one is basically the same as addScripts, but it uses the
+		// list of CSS files that we discovered above to load things.
+		
+		foreach ($styles as $style) {
+			list($location, $style, $dependencies) = $style;
+			$this->addStyle($location, $style, $dependencies);
+		}
+	}
+	
+	/**
+	 * @param string $location
+	 * @param string $style
+	 * @param array  $dependencies
+	 *
+	 * @return void
+	 * @throws ThemeException
+	 */
+	protected function addStyle(string $location, string $style, array $dependencies = []): void {
+		
+		if (!isset($this->scripts[$location][$style])) {
+			throw new ThemeException("Unknown style: $style.",
+				ThemeException::UNKNOWN_STYLE);
+		}
+		
+		$handle = sprintf("%s-%s", $location, $style);
+		$file = $this->styles[$location][$style];
+		$version = filemtime($file["realPath"]);
+		
+		wp_enqueue_style($handle, $file["webPath"], $dependencies, $version);
+	}
+	
+	/**
+	 * @param array $sidebars
+	 *
+	 * @return void
+	 */
+	protected function addSidebars(array $sidebars): void {
+		$sidebarMarkup = $this->getSidebarMarkup();
+		
+		foreach ($sidebars as $sidebar => $description) {
+			$sidebarId = strtolower(preg_replace("/\W+/", "-", $sidebar));
+			
+			// we assume that those that use this boilerplate will return
+			// the markup that we want around the sidebar header and the
+			// sidebar itself.  by merging our name, id, and description
+			// into that array, we create the full argument for
+			
+			register_sidebar(array_merge($sidebarMarkup, [
+				"id"          => $sidebarId,
+				"name"        => $sidebar,
+				"description" => $description,
+			]));
+		}
+	}
+	
+	/**
+	 * @return array
+	 */
+	protected function getSidebarMarkup(): array {
+		
+		// this is just a default; we leave it to the user of the
+		// boilerplate to override this information if they want to
+		// use something else.
+		
+		return [
+			"before_widget" => '<aside id="%1$s" class="widget %2$s">',
+			"before_title"  => "<header class='widget-header'><h3>",
+			"after_title"   => "</h3></header>",
+			"after_widget"  => "</aside>"
+		];
+	}
+	
+	/**
+	 *
+	 */
+	final protected function defineBackendHooks(): void {
+		$this->raiseWarning(__METHOD__);
 	}
 }
