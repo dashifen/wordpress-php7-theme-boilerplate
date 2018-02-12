@@ -2,7 +2,9 @@
 
 namespace Dashifen\WPTB\Theme;
 
-interface ThemeInterface {
+use Dashifen\WPPB\Controller\ControllerInterface;
+
+interface ThemeInterface extends ControllerInterface {
 	/**
 	 * @return void
 	 */
