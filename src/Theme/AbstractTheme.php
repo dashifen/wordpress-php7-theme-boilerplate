@@ -249,6 +249,34 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	}
 	
 	/**
+	 * @return string
+	 */
+	public function getStylesheetDir(): string {
+		return $this->stylesheetDir;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getStylesheetUrl(): string {
+		return $this->stylesheetUrl;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getTemplateDir(): string {
+		return $this->templateDir;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getTemplateUrl(): string {
+		return $this->templateUrl;
+	}
+	
+	/**
 	 * @param array $scripts
 	 *
 	 * @return void
@@ -367,15 +395,15 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 		// use something else.
 		
 		return [
-			"before_widget" => '<aside id="%1$s" class="widget %2$s">',
-			"before_title"  => "<header class='widget-header'><h3>",
-			"after_title"   => "</h3></header>",
-			"after_widget"  => "</aside>"
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'before_title'  => '<header><h2 class="widget-title">',
+			'after_title'   => '</h2></header>',
+			'after_widget'  => '</aside>',
 		];
 	}
 	
 	/**
-	 *
+	 * @return void
 	 */
 	final protected function defineBackendHooks(): void {
 		$this->raiseWarning(__METHOD__);
