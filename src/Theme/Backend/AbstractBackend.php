@@ -4,6 +4,9 @@ namespace Dashifen\WPTB\Theme\Backend;
 
 use Dashifen\WPPB\Component\Backend\AbstractBackend as PluginBackend;
 use Dashifen\WPTB\Theme\ThemeInterface;
+use Dashifen\WPTB\Theme\Backend\Activator\Activator;
+use Dashifen\WPTB\Theme\Backend\Deactivator\Deactivator;
+use Dashifen\WPTB\Theme\Backend\Uninstaller\Uninstaller;
 
 /**
  * Class AbstractBackend
@@ -16,7 +19,15 @@ abstract class AbstractBackend extends PluginBackend {
 	 * @param ThemeInterface $theme
 	 */
 	public function __construct(ThemeInterface $theme) {
-		parent::__construct($theme, null, null, null);
+		
+		// since many (most?) themes don't need to hook events to these,
+		// we've stubbed them in the boilerplate so that the actual themes
+		// made from it don't need to worry about them.  but, if someone
+		// wants to use them, they can always extend things and overwrite
+		// the stubs.
+		
+		parent::__construct($theme, new Activator($theme),
+			new Deactivator($theme), New Uninstaller($theme));
 	}
 	
 	/**
