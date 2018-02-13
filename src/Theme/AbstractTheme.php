@@ -258,7 +258,7 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 * @return void
 	 * @throws ThemeException
 	 */
-	protected function addScripts(array $scripts): void {
+	public function addScripts(array $scripts): void {
 		
 		// to add scripts, we get a specifically structured multi-
 		// dimensional array.  the value of each index is the location,
@@ -280,7 +280,7 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 * @return void
 	 * @throws ThemeException
 	 */
-	protected function addScript(string $location, string $script, array $dependencies = []): void {
+	public function addScript(string $location, string $script, array $dependencies = []): void {
 		
 		// $location tells us if this is a template (parent) or (child)
 		// theme script.  that allows us to narrow down the list of scripts
@@ -304,7 +304,7 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 *
 	 * @throws ThemeException
 	 */
-	protected function addStyles(array $styles): void {
+	public function addStyles(array $styles): void {
 		
 		// this one is basically the same as addScripts, but it uses the
 		// list of CSS files that we discovered above to load things.
@@ -323,7 +323,7 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 * @return void
 	 * @throws ThemeException
 	 */
-	protected function addStyle(string $location, string $style, array $dependencies = []): void {
+	public function addStyle(string $location, string $style, array $dependencies = []): void {
 		
 		if (!isset($this->scripts[$location][$style])) {
 			throw new ThemeException("Unknown style: $style.",
@@ -342,7 +342,7 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 *
 	 * @return void
 	 */
-	protected function addSidebars(array $sidebars): void {
+	public function addSidebars(array $sidebars): void {
 		$sidebarMarkup = $this->getSidebarMarkup();
 		
 		foreach ($sidebars as $sidebar => $description) {

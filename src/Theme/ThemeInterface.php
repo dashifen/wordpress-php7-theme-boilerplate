@@ -33,4 +33,33 @@ interface ThemeInterface extends ControllerInterface {
 	 * @return string
 	 */
 	public function getTemplateUrl(): string;
+	
+	/**
+	 * @param array $scripts
+	 */
+	public function addScripts(array $scripts): void;
+	
+	/**
+	 * @param string $location
+	 * @param string $script
+	 * @param array  $dependencies
+	 */
+	public function addScript(string $location, string $script, array $dependencies = []): void;
+	
+	/**
+	 * @param array $styles
+	 */
+	public function addStyles(array $styles): void;
+	
+	/**
+	 * @param string $location
+	 * @param string $style
+	 * @param array  $dependencies
+	 */
+	public function addStyle(string $location, string $style, array $dependencies = []): void;
+	
+	/**
+	 * @param array $sidebars
+	 */
+	public function addSidebars(array $sidebars): void;
 }
