@@ -2,14 +2,14 @@
 
 namespace Dashifen\WPTB\Theme\Frontend;
 
-use Dashifen\WPPB\Component\AbstractComponent;
+use Dashifen\WPPB\Component\AbstractComponent as PluginComponent;
 use Dashifen\WPTB\Theme\ThemeInterface;
 
 /**
  * Class Frontend
  * @package Dashifen\WPTB\Theme\Frontend
  */
-class Frontend extends AbstractComponent implements FrontendInterface {
+abstract class AbstractFrontend extends PluginComponent implements FrontendInterface {
 	/**
 	 * @var ThemeInterface $theme;
 	 */
@@ -28,6 +28,11 @@ class Frontend extends AbstractComponent implements FrontendInterface {
 	 * @return ThemeInterface
 	 */
 	public function getTheme(): ThemeInterface {
+		
+		// this function is provided to, essentially, make it less
+		// clear that this property is named "controller" from the plugin
+		// boilerplate and let people think of it as if it's a theme.
+		
 		return $this->controller;
 	}
 }

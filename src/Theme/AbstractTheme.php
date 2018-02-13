@@ -2,7 +2,6 @@
 
 namespace Dashifen\WPTB\Theme;
 
-use Dashifen\WPPB\Component\Backend\BackendInterface;
 use Dashifen\WPPB\Controller\AbstractController;
 use Dashifen\WPPB\Loader\LoaderException;
 use Dashifen\WPPB\Loader\LoaderInterface;
@@ -226,29 +225,6 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	}
 	
 	/**
-	 * @return BackendInterface|null
-	 */
-	final public function getBackend(): ?BackendInterface {
-		$this->raiseWarning(__METHOD__);
-		return null;
-	}
-	
-	/**
-	 * @param string $method
-	 *
-	 * @return bool
-	 */
-	protected function raiseWarning(string $method): bool {
-		
-		// it's tempting to make this method final as well as the prior
-		// two.  but, since we're putting an English error message in here,
-		// it seems better to leave it as something themes can overwrite
-		// and run through the i18n API should they need to.
-		
-		return trigger_error("Inappropriate use of $method in theme.", E_WARNING);
-	}
-	
-	/**
 	 * @return string
 	 */
 	public function getStylesheetDir(): string {
@@ -400,12 +376,5 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 			'after_title'   => '</h2></header>',
 			'after_widget'  => '</aside>',
 		];
-	}
-	
-	/**
-	 * @return void
-	 */
-	final protected function defineBackendHooks(): void {
-		$this->raiseWarning(__METHOD__);
 	}
 }
