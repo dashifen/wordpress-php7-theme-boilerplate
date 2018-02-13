@@ -10,11 +10,6 @@ use Dashifen\WPPB\Controller\ControllerInterface;
  */
 interface ThemeInterface extends ControllerInterface {
 	/**
-	 * @return void
-	 */
-	public function initialize(): void;
-	
-	/**
 	 * @return string
 	 */
 	public function getStylesheetDir(): string;

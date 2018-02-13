@@ -3,7 +3,6 @@
 namespace Dashifen\WPTB\Theme;
 
 use Dashifen\WPPB\Controller\AbstractController;
-use Dashifen\WPPB\Loader\LoaderException;
 use Dashifen\WPPB\Loader\LoaderInterface;
 
 /**
@@ -191,22 +190,6 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 */
 	protected function loadStyles(string $folder = "", bool $folderForBoth = false): void {
 		$this->styles = $this->findFiles("css", $folder, $folderForBoth);
-	}
-	
-	/**
-	 * @return void
-	 * @throws LoaderException
-	 */
-	public function initialize(): void {
-		
-		// initializing a theme is as simple as defining its frontend
-		// hooks and then attaching them to WordPress.  at this time,
-		// we're assuming (temporarily) that we're not doing things to
-		// the WordPress backend because this is a theme and not a
-		// plugin.
-		
-		$this->defineFrontendHooks();
-		$this->attachHooks();
 	}
 	
 	/**
