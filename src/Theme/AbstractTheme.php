@@ -58,18 +58,10 @@ abstract class AbstractTheme extends AbstractController implements ThemeInterfac
 	 * @throws ThemeException
 	 */
 	public function __construct(LoaderInterface $loader) {
-		$homogenizeSeparator = function(string $string): string {
-			
-			// this is a very small filter that homogenizes the use of
-			// various slashes in the paths we grab below.
-			
-			return preg_replace("/\/|\\\\/", DIRECTORY_SEPARATOR, $string);
-		};
-		
-		$this->templateDir = $homogenizeSeparator(get_template_directory());
-		$this->templateUrl = $homogenizeSeparator(get_template_directory_uri());
-		$this->stylesheetDir = $homogenizeSeparator(get_stylesheet_directory());
-		$this->stylesheetUrl = $homogenizeSeparator(get_stylesheet_directory_uri());
+		$this->templateDir = get_template_directory();
+		$this->templateUrl = get_template_directory_uri();
+		$this->stylesheetDir = get_stylesheet_directory();
+		$this->stylesheetUrl = get_stylesheet_directory_uri();
 		$this->child = $this->templateDir !== $this->stylesheetDir;
 		$this->theme = wp_get_theme();
 		
